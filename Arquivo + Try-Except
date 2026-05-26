@@ -1,0 +1,19 @@
+import csv
+
+with open("erros.log", "w", encoding="utf-8") as log:
+
+    with open("vendas.csv", "r", encoding="utf-8") as arquivo:
+
+        leitor = csv.reader(arquivo)
+
+        for linha in leitor:
+
+            try:
+
+                produto = linha[0]
+                valor = float(linha[1])
+
+                print(produto, valor)
+
+            except:
+                log.write(f"Erro na linha: {linha}\n")
