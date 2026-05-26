@@ -1,0 +1,76 @@
+import sqlite3
+import json
+
+conexao = sqlite3.connect("vendas.db")
+
+cursor = conexao.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS vendas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    produto TEXT,
+    valor REAL,
+    data TEXT
+)
+""")
+
+cursor.execute("""
+INSERT INTO vendas (produto, valor, data)
+VALUES ('Mouse', 50, '2026-01-10')
+""")
+
+cursor.execute("""
+INSERT INTO vendas (produto, valor, data)
+VALUES ('Teclado', 120, '2026-01-15')
+""")
+
+cursor.execute("""
+INSERT INTO vendas (produto, valor, data)
+VALUES ('Monitor', 900, '2026-02-20')
+""")
+
+conexao.commit()
+
+try:
+
+    cursor.execute("""
+    SELECT
+        substr(data, 1, 7) AS mes,
+        COUNT(*) AS quantidade,
+        SUM(valor) AS total
+    FROM vendas
+    GROUP BY mes
+    """)
+
+    resultados = cursor.fetchall()
+
+    relatorio = []
+
+    for linha in resultados:
+
+        relatorio.append({
+            "mes": linha[0],
+            "quantidade_vendas": linha[1],
+            "valor_total": linha[2]
+        })
+
+    with open(
+        "relatorio_ano_2026.json",
+        "w",
+        encoding="utf-8"
+    ) as arquivo:
+
+        json.dump(
+            relatorio,
+            arquivo,
+            indent=4,
+            ensure_ascii=False
+        )
+
+    print("Relatório criado com sucesso.")
+
+except Exception as erro:
+
+    print("Erro:", erro)
+
+conexao.close()
