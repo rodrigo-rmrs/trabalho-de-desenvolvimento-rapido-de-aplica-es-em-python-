@@ -1,0 +1,87 @@
+from tkinter import *
+from tkinter import filedialog, messagebox
+
+janela = Tk()
+
+janela.title("Criptografador")
+janela.geometry("400x250")
+
+arquivo_selecionado = ""
+
+def selecionar():
+
+    global arquivo_selecionado
+
+    arquivo_selecionado = filedialog.askopenfilename(
+        filetypes=[("Texto", "*.txt")]
+    )
+
+    label_arquivo["text"] = arquivo_selecionado
+
+def criptografar():
+
+    try:
+
+        chave = int(campo_chave.get())
+
+        if arquivo_selecionado == "":
+            raise ValueError
+
+        with open(
+            arquivo_selecionado,
+            "r",
+            encoding="utf-8"
+        ) as arquivo:
+
+            texto = arquivo.read()
+
+        resultado = ""
+
+        for letra in texto:
+
+            resultado += chr(ord(letra) + chave)
+
+        with open(
+            "arquivo_criptografado.enc",
+            "w",
+            encoding="utf-8"
+        ) as novo:
+
+            novo.write(resultado)
+
+        messagebox.showinfo(
+            "Sucesso",
+            "Arquivo criptografado."
+        )
+
+    except:
+
+        messagebox.showerror(
+            "Erro",
+            "Chave inválida."
+        )
+
+Button(
+    janela,
+    text="Selecionar Arquivo",
+    command=selecionar
+).pack(pady=10)
+
+label_arquivo = Label(janela, text="")
+label_arquivo.pack()
+
+Label(
+    janela,
+    text="Digite a chave numérica"
+).pack()
+
+campo_chave = Entry(janela)
+campo_chave.pack()
+
+Button(
+    janela,
+    text="Criptografar",
+    command=criptografar
+).pack(pady=10)
+
+janela.mainloop()
