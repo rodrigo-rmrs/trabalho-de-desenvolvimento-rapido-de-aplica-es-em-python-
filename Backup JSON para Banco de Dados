@@ -1,0 +1,53 @@
+import json
+import mysql.connector
+import os
+
+try:
+    conexao = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="1234",
+        database="teste"
+    )
+
+    cursor = conexao.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS vendas (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        produto VARCHAR(100),
+        valor FLOAT
+    )
+    """)
+
+    pasta = "backups"
+
+    for arquivo in os.listdir(pasta):
+        if arquivo.endswith(".json"):
+
+            caminho = os.path.join(pasta, arquivo)
+
+            try:
+                with open(caminho, "r", encoding="utf-8") as f:
+                    dados = json.load(f)
+
+                cursor.execute(
+                    "INSERT INTO vendas (produto, valor) VALUES (%s, %s)",
+                    (dados["produto"], dados["valor"])
+                )
+
+                conexao.commit()
+
+                print("Arquivo importado:", arquivo)
+
+            except Exception as erro:
+                print("Erro no arquivo", arquivo, ":", erro)
+
+except Exception as erro:
+    print("Erro na conexão:", erro)
+
+finally:
+    try:
+        conexao.close()
+    except:
+        pass
