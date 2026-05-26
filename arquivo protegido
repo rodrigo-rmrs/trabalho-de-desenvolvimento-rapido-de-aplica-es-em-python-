@@ -1,0 +1,8 @@
+arquivo = input("Digite o nome do arquivo: ")
+try:
+    with open(arquivo, "r", encoding="utf-8") as arq:
+        print(arq.read())
+except FileNotFoundError:
+    print("Arquivo não encontrado.")
+except PermissionError:
+    print("Sem permissão para abrir o arquivo.")
