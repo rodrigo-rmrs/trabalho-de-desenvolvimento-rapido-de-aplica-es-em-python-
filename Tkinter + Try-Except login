@@ -1,0 +1,36 @@
+from tkinter import *
+from tkinter import messagebox
+
+janela = Tk()
+
+janela.geometry("300x200")
+
+def entrar():
+
+    try:
+
+        usuario = campo_usuario.get()
+        senha = campo_senha.get()
+
+        if usuario == "" or senha == "":
+            raise ValueError
+
+        messagebox.showinfo("Sucesso", "Login realizado.")
+
+    except:
+
+        messagebox.showerror("Erro", "Preencha todos os campos.")
+
+Label(janela, text="Usuário").pack()
+
+campo_usuario = Entry(janela)
+campo_usuario.pack()
+
+Label(janela, text="Senha").pack()
+
+campo_senha = Entry(janela, show="*")
+campo_senha.pack()
+
+Button(janela, text="Entrar", command=entrar).pack(pady=10)
+
+janela.mainloop()
