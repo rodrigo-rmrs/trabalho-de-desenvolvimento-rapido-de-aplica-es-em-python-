@@ -1,0 +1,163 @@
+from tkinter import *
+from tkinter import filedialog, messagebox
+import sqlite3
+import re
+import os
+
+janela = Tk()
+
+janela.title("Dashboard")
+janela.geometry("800x500")
+
+conexao = sqlite3.connect("dashboard.db")
+
+cursor = conexao.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS dados (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    texto TEXT
+)
+""")
+
+conexao.commit()
+
+os.makedirs("logs_erro", exist_ok=True)
+
+def salvar_erro(erro):
+
+    with open(
+        "logs_erro/erros.txt",
+        "a",
+        encoding="utf-8"
+    ) as arquivo:
+
+        arquivo.write(str(erro) + "\n")
+
+def importar_arquivo():
+
+    try:
+
+        arquivo = filedialog.askopenfilename(
+            filetypes=[("Texto", "*.txt")]
+        )
+
+        if arquivo == "":
+            return
+
+        with open(
+            arquivo,
+            "r",
+            encoding="utf-8"
+        ) as f:
+
+            linhas = f.readlines()
+
+        for linha in linhas:
+
+            linha = linha.strip()
+
+            cursor.execute(
+                "INSERT INTO dados (texto) VALUES (?)",
+                (linha,)
+            )
+
+        conexao.commit()
+
+        listar()
+
+        messagebox.showinfo(
+            "Sucesso",
+            "Arquivo importado."
+        )
+
+    except Exception as erro:
+
+        salvar_erro(erro)
+
+        messagebox.showerror(
+            "Erro",
+            str(erro)
+        )
+
+def listar():
+
+    lista.delete(0, END)
+
+    cursor.execute(
+        "SELECT texto FROM dados"
+    )
+
+    dados = cursor.fetchall()
+
+    for dado in dados:
+
+        lista.insert(END, dado[0])
+
+def pesquisar():
+
+    try:
+
+        lista.delete(0, END)
+
+        texto = entrada_pesquisa.get()
+
+        cursor.execute(
+            "SELECT texto FROM dados"
+        )
+
+        dados = cursor.fetchall()
+
+        for dado in dados:
+
+            if re.search(texto, dado[0]):
+
+                lista.insert(END, dado[0])
+
+    except Exception as erro:
+
+        salvar_erro(erro)
+
+        messagebox.showerror(
+            "Erro",
+            "Pesquisa inválida."
+        )
+
+frame1 = Frame(janela)
+frame1.pack(pady=10)
+
+Button(
+    frame1,
+    text="Importar TXT",
+    command=importar_arquivo
+).pack(side=LEFT, padx=10)
+
+Button(
+    frame1,
+    text="Listar Dados",
+    command=listar
+).pack(side=LEFT, padx=10)
+
+frame2 = Frame(janela)
+frame2.pack(pady=10)
+
+Label(
+    frame2,
+    text="Pesquisar"
+).pack(side=LEFT)
+
+entrada_pesquisa = Entry(frame2)
+entrada_pesquisa.pack(side=LEFT, padx=10)
+
+Button(
+    frame2,
+    text="Buscar",
+    command=pesquisar
+).pack(side=LEFT)
+
+lista = Listbox(janela, width=90, height=20)
+lista.pack(pady=20)
+
+janela.mainloop()
+
+conexao.close()
