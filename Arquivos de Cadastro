@@ -1,0 +1,49 @@
+import re
+import csv
+
+with open("cadastros_sujos.txt", "r", encoding="utf-8") as arquivo:
+
+    linhas = arquivo.readlines()
+
+with open("clientes_limpos.csv", "w", newline="", encoding="utf-8") as csvfile:
+
+    escritor = csv.writer(csvfile)
+
+    escritor.writerow(["Nome", "Email", "Telefone"])
+
+    for linha in linhas:
+
+        try:
+
+            email = re.search(
+                r'[\w\.-]+@[\w\.-]+\.\w+',
+                linha
+            )
+
+            telefone = re.search(
+                r'\(\d{2}\)\s\d{5}-\d{4}',
+                linha
+            )
+
+            nome = linha
+
+            if email:
+                nome = nome.replace(email.group(), "")
+
+            if telefone:
+                nome = nome.replace(telefone.group(), "")
+
+            nome = " ".join(nome.split())
+
+            if not email or not telefone:
+                raise ValueError
+
+            escritor.writerow([
+                nome,
+                email.group(),
+                telefone.group()
+            ])
+
+        except:
+
+            print("Linha inválida:", linha)
