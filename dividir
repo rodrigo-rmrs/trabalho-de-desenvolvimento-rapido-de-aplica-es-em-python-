@@ -1,0 +1,15 @@
+def dividir(a, b):
+
+    try:
+        resultado = a / b
+        print("Resultado:", resultado)
+    except ZeroDivisionError:
+        print("Erro: divisão por zero.")
+    except ValueError:
+        print("Erro: valor inválido.")
+try:
+    num1 = float(input("Digite o primeiro número: "))
+    num2 = float(input("Digite o segundo número: "))
+    dividir(num1, num2)
+except ValueError:
+    print("Digite apenas números.")
