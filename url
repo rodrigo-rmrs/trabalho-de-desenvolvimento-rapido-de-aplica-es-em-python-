@@ -1,0 +1,13 @@
+import re
+texto_urls = """
+Sites:
+https://google.com
+http://github.com
+https://youtube.com
+"""
+padrao_url = r'https?://[^\s]+'
+urls = re.findall(padrao_url, texto_urls)
+print("\n========== EXERCÍCIO 11 ==========")
+print("URLs encontradas:")
+for url in urls:
+    print(url)
