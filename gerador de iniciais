@@ -1,0 +1,12 @@
+import re
+
+def gerar_iniciais(nome):
+    ignorar = ["da", "de", "do", "dos", "das"]
+    palavras = nome.split()
+    iniciais = ""
+    for palavra in palavras:
+        if palavra.lower() not in ignorar:
+            iniciais += palavra[0].upper() + "."
+    return iniciais
+nome = input("Digite o nome completo: ")
+print("Iniciais:", gerar_iniciais(nome))
