@@ -1,0 +1,13 @@
+lista = ["10", "5.5", "texto", [1, 2], "20"]
+
+for item in lista:
+
+    try:
+        numero = float(item)
+        print(item, "->", numero)
+
+    except ValueError:
+        print(item, "não pode ser convertido.")
+
+    except TypeError:
+        print(item, "é um tipo inválido.")
