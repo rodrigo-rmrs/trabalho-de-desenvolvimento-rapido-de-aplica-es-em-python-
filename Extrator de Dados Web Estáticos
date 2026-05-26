@@ -1,0 +1,54 @@
+import re
+import sqlite3
+
+with open("pagina.html", "r", encoding="utf-8") as arquivo:
+
+    html = arquivo.read()
+
+imagens = re.findall(
+    r'<img.*?src="(.*?)"',
+    html
+)
+
+links = re.findall(
+    r'<a.*?href="(.*?)"',
+    html
+)
+
+conexao = sqlite3.connect("web.db")
+
+cursor = conexao.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS imagens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    caminho TEXT
+)
+""")
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    url TEXT
+)
+""")
+
+for imagem in imagens:
+
+    cursor.execute(
+        "INSERT INTO imagens (caminho) VALUES (?)",
+        (imagem,)
+    )
+
+for link in links:
+
+    cursor.execute(
+        "INSERT INTO links (url) VALUES (?)",
+        (link,)
+    )
+
+conexao.commit()
+
+print("Dados extraídos com sucesso.")
+
+conexao.close()
