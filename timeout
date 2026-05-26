@@ -1,0 +1,13 @@
+import random
+
+class ConnectionTimeoutError(Exception):
+    pass
+def conectar():
+    numero = random.randint(1, 10)
+    if numero % 2 == 0:
+        raise ConnectionTimeoutError("Tempo de conexão esgotado.")
+    print("Conexão realizada com sucesso.")
+try:
+    conectar()
+except ConnectionTimeoutError as erro:
+    print("Erro:", erro)
