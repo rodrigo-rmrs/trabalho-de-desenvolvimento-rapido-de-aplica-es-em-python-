@@ -1,0 +1,30 @@
+from tkinter import *
+
+janela = Tk()
+
+janela.title("Calculadora")
+janela.geometry("300x250")
+
+def somar():
+    resultado["text"] = float(n1.get()) + float(n2.get())
+def subtrair():
+    resultado["text"] = float(n1.get()) - float(n2.get())
+def multiplicar():
+    resultado["text"] = float(n1.get()) * float(n2.get())
+def dividir():
+    resultado["text"] = float(n1.get()) / float(n2.get())
+
+n1 = Entry(janela)
+n1.pack(pady=5)
+n2 = Entry(janela)
+n2.pack(pady=5)
+
+Button(janela, text="+", command=somar).pack()
+Button(janela, text="-", command=subtrair).pack()
+Button(janela, text="*", command=multiplicar).pack()
+Button(janela, text="/", command=dividir).pack()
+
+resultado = Label(janela, text="Resultado")
+resultado.pack(pady=10)
+
+janela.mainloop()
