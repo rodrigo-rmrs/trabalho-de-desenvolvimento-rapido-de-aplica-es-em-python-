@@ -1,0 +1,19 @@
+import mysql.connector
+
+conexao = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="1234"
+)
+
+cursor = conexao.cursor()
+
+# Mostrando versão
+cursor.execute("SELECT VERSION()")
+
+versao = cursor.fetchone()
+
+print("Versão do MySQL:", versao)
+
+
+conexao.close()
