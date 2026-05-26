@@ -1,0 +1,130 @@
+from tkinter import *
+from tkinter import messagebox
+import sqlite3
+
+janela = Tk()
+
+janela.title("Mini ERP")
+janela.geometry("500x400")
+
+conexao = sqlite3.connect("estoque.db")
+
+cursor = conexao.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS produtos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT,
+    preco REAL
+)
+""")
+
+def cadastrar():
+
+    nome = campo_nome.get()
+    preco = campo_preco.get()
+
+    try:
+
+        if nome == "" or preco == "":
+            raise ValueError
+
+        preco = float(preco)
+
+        cursor.execute(
+            "INSERT INTO produtos (nome, preco) VALUES (?, ?)",
+            (nome, preco)
+        )
+
+        conexao.commit()
+
+        messagebox.showinfo(
+            "Sucesso",
+            "Produto cadastrado."
+        )
+
+        listar()
+
+    except:
+
+        messagebox.showerror(
+            "Erro",
+            "Dados inválidos."
+        )
+
+def listar():
+
+    lista.delete(0, END)
+
+    cursor.execute(
+        "SELECT * FROM produtos"
+    )
+
+    produtos = cursor.fetchall()
+
+    for produto in produtos:
+
+        texto = f"{produto[0]} - {produto[1]} - R$ {produto[2]:.2f}"
+
+        lista.insert(END, texto)
+
+def deletar():
+
+    try:
+
+        selecionado = lista.get(
+            lista.curselection()
+        )
+
+        id_produto = selecionado.split(" - ")[0]
+
+        cursor.execute(
+            "DELETE FROM produtos WHERE id=?",
+            (id_produto,)
+        )
+
+        conexao.commit()
+
+        listar()
+
+    except:
+
+        messagebox.showerror(
+            "Erro",
+            "Selecione um produto."
+        )
+
+Label(janela, text="Nome").pack()
+
+campo_nome = Entry(janela)
+campo_nome.pack()
+
+Label(janela, text="Preço").pack()
+
+campo_preco = Entry(janela)
+campo_preco.pack()
+
+Button(
+    janela,
+    text="Cadastrar",
+    command=cadastrar
+).pack(pady=5)
+
+Button(
+    janela,
+    text="Listar",
+    command=listar
+).pack(pady=5)
+
+Button(
+    janela,
+    text="Deletar",
+    command=deletar
+).pack(pady=5)
+
+lista = Listbox(janela, width=50)
+lista.pack(pady=10)
+
+janela.mainloop()
+
+conexao.close()
