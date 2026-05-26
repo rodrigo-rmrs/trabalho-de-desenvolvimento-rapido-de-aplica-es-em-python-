@@ -1,0 +1,6 @@
+with open("sistema.log", "r", encoding="utf-8") as arquivo:
+    conteudo = arquivo.read()
+erros = conteudo.count("ERROR")
+warnings = conteudo.count("WARNING")
+print("Quantidade de ERROR:", erros)
+print("Quantidade de WARNING:", warnings)
