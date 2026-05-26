@@ -1,0 +1,101 @@
+from tkinter import *
+from tkinter import messagebox
+import sqlite3
+import re
+
+janela = Tk()
+
+janela.title("Cadastro")
+janela.geometry("350x300")
+
+conexao = sqlite3.connect("usuarios.db")
+
+cursor = conexao.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT,
+    email TEXT,
+    cpf TEXT UNIQUE
+)
+""")
+
+def salvar():
+
+    nome = campo_nome.get()
+    email = campo_email.get()
+    cpf = campo_cpf.get()
+
+    padrao_email = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+
+    padrao_cpf = r'^\d{3}\.\d{3}\.\d{3}-\d{2}$'
+
+    if not re.match(padrao_email, email):
+
+        messagebox.showerror(
+            "Erro",
+            "E-mail inválido."
+        )
+
+        return
+
+    if not re.match(padrao_cpf, cpf):
+
+        messagebox.showerror(
+            "Erro",
+            "CPF inválido."
+        )
+
+        return
+
+    try:
+
+        cursor.execute(
+            """
+            INSERT INTO usuarios
+            (nome, email, cpf)
+
+            VALUES (?, ?, ?)
+            """,
+            (nome, email, cpf)
+        )
+
+        conexao.commit()
+
+        messagebox.showinfo(
+            "Sucesso",
+            "Cadastro realizado."
+        )
+
+    except sqlite3.IntegrityError:
+
+        messagebox.showerror(
+            "Erro",
+            "CPF já cadastrado."
+        )
+
+Label(janela, text="Nome").pack()
+
+campo_nome = Entry(janela)
+campo_nome.pack()
+
+Label(janela, text="E-mail").pack()
+
+campo_email = Entry(janela)
+campo_email.pack()
+
+Label(janela, text="CPF").pack()
+
+campo_cpf = Entry(janela)
+campo_cpf.pack()
+
+Button(
+    janela,
+    text="Salvar",
+    command=salvar
+).pack(pady=10)
+
+janela.mainloop()
+
+conexao.close()
