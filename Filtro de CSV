@@ -1,0 +1,11 @@
+import csv
+with open("funcionarios.csv", "r", encoding="utf-8") as arquivo:
+    leitor = csv.DictReader(arquivo)
+    with open("funcionarios_filtrados.csv", "w", newline="", encoding="utf-8") as novo_arquivo:
+        campos = ["Nome", "Cargo", "Salario"]
+        escritor = csv.DictWriter(novo_arquivo, fieldnames=campos)
+        escritor.writeheader()
+        for linha in leitor:
+            if float(linha["Salario"]) > 5000:
+                escritor.writerow(linha)
+print("Funcionários filtrados com sucesso")
