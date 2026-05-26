@@ -1,0 +1,22 @@
+from tkinter import *
+
+janela = Tk()
+
+janela.title("Cores")
+janela.geometry("300x200")
+
+cor = StringVar()
+
+def mudar_cor():
+    janela.config(bg=cor.get())
+
+Radiobutton(janela, text="Vermelho", value="red",
+            variable=cor, command=mudar_cor).pack()
+
+Radiobutton(janela, text="Verde", value="green",
+            variable=cor, command=mudar_cor).pack()
+
+Radiobutton(janela, text="Azul", value="blue",
+            variable=cor, command=mudar_cor).pack()
+
+janela.mainloop()
