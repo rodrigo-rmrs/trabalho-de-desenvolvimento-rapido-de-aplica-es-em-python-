@@ -1,0 +1,11 @@
+import json
+produtos = [
+    {"ID": 1, "nome": "Mouse", "preco": 50, "estoque": 10},
+    {"ID": 2, "nome": "Teclado", "preco": 120, "estoque": 5},
+    {"ID": 3, "nome": "Monitor", "preco": 900, "estoque": 3},
+    {"ID": 4, "nome": "Notebook", "preco": 3500, "estoque": 2},
+    {"ID": 5, "nome": "Headset", "preco": 200, "estoque": 8}
+]
+with open("produtos.json", "w", encoding="utf-8") as arquivo:
+    json.dump(produtos, arquivo, indent=4, ensure_ascii=False)
+print("Arquivo JSON criado com sucesso!")
