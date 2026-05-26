@@ -1,0 +1,21 @@
+from tkinter import *
+
+janela = Tk()
+
+janela.title("Boas-Vindas")
+janela.geometry("300x200")
+
+def mostrar_mensagem():
+    nome = entrada.get()
+    texto["text"] = f"Olá, {nome}!"
+
+entrada = Entry(janela)
+entrada.pack(pady=10)
+
+botao = Button(janela, text="Enviar", command=mostrar_mensagem)
+botao.pack(pady=10)
+
+texto = Label(janela, text="")
+texto.pack(pady=10)
+
+janela.mainloop()
