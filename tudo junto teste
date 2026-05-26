@@ -1,0 +1,982 @@
+import os
+import re
+import csv
+import json
+import time
+import shutil
+import random
+import sqlite3
+import hashlib
+from datetime import datetime
+
+try:
+    from tkinter import *
+    from tkinter import messagebox, filedialog
+except:
+    pass
+
+
+def pausar():
+    input("\nPressione ENTER para voltar ao menu...")
+
+
+def criar_arquivos_exemplo():
+    arquivos = {
+        "poema.txt": "Rosas são vermelhas\nVioletas são azuis\nPython é legal\n",
+        "dados.txt": "Linha 1\nLinha 2\nLinha 3\n",
+        "funcionarios.csv": "Nome,Cargo,Salario\nJoão,Analista,6000\nMaria,Auxiliar,3000\nCarlos,Gerente,8000\n",
+        "sistema.log": "INFO sistema iniciado\nWARNING memória alta\nERROR falha no serviço\nCRITICAL servidor caiu\n",
+        "datas.txt": "Hoje é 10/05/2026\nOutra data 2026-12-25\nTeste 01/01/2020\n",
+        "vendas.csv": "Mouse,50\nTeclado,120\nProdutoErro,abc\nMonitor,900\n",
+        "cadastros_sujos.txt": "João Silva joao@gmail.com (21) 99999-1234\nMaria Souza maria@hotmail.com (11) 98888-7777\nlinha errada sem dados\nCarlos Lima carlos@yahoo.com (31) 97777-6666\n",
+        "pagina.html": '<html><body><img src="imagem1.png"><img src="foto.jpg"><a href="https://google.com">Google</a><a href="https://youtube.com">YouTube</a></body></html>',
+        "texto.txt": "Olá mundo\nTeste de criptografia\n",
+        "dados_dashboard.txt": "Mouse Gamer\nTeclado Mecânico\nMonitor Full HD\nHeadset RGB\n"
+    }
+
+    for nome, conteudo in arquivos.items():
+        if not os.path.exists(nome):
+            with open(nome, "w", encoding="utf-8", newline="") as f:
+                f.write(conteudo)
+
+    os.makedirs("entrada", exist_ok=True)
+    os.makedirs("processados", exist_ok=True)
+    os.makedirs("backups", exist_ok=True)
+
+    with open("entrada/teste.txt", "w", encoding="utf-8") as f:
+        f.write("Meu primeiro arquivo\nConteúdo teste")
+
+    with open("backups/venda1.json", "w", encoding="utf-8") as f:
+        json.dump({"produto": "Mouse", "valor": 50}, f, indent=4)
+
+    print("Arquivos de exemplo criados.")
+
+
+# 1 a 6
+def ex01():
+    with open("poema.txt", "r", encoding="utf-8") as arquivo:
+        linhas = arquivo.readlines()
+    palavras = sum(len(linha.split()) for linha in linhas)
+    print("Linhas:", len(linhas))
+    print("Palavras:", palavras)
+
+
+def ex02():
+    with open("dados.txt", "r", encoding="utf-8") as arquivo:
+        linhas = arquivo.readlines()
+    linhas.reverse()
+    with open("dados_reverso.txt", "w", encoding="utf-8") as novo:
+        novo.writelines(linhas)
+    print("Arquivo dados_reverso.txt criado.")
+
+
+def ex03():
+    with open("funcionarios.csv", "r", encoding="utf-8") as arquivo:
+        leitor = csv.DictReader(arquivo)
+        with open("funcionarios_filtrados.csv", "w", newline="", encoding="utf-8") as novo:
+            campos = ["Nome", "Cargo", "Salario"]
+            escritor = csv.DictWriter(novo, fieldnames=campos)
+            escritor.writeheader()
+            for linha in leitor:
+                if float(linha["Salario"]) > 5000:
+                    escritor.writerow(linha)
+    print("Arquivo funcionarios_filtrados.csv criado.")
+
+
+def ex04():
+    with open("sistema.log", "r", encoding="utf-8") as arquivo:
+        texto = arquivo.read()
+    print("ERROR:", texto.count("ERROR"))
+    print("WARNING:", texto.count("WARNING"))
+
+
+def ex05():
+    produtos = [
+        {"ID": 1, "nome": "Mouse", "preco": 50, "estoque": 10},
+        {"ID": 2, "nome": "Teclado", "preco": 120, "estoque": 5},
+        {"ID": 3, "nome": "Monitor", "preco": 900, "estoque": 3},
+        {"ID": 4, "nome": "Notebook", "preco": 3500, "estoque": 2},
+        {"ID": 5, "nome": "Headset", "preco": 200, "estoque": 8}
+    ]
+    with open("produtos.json", "w", encoding="utf-8") as arquivo:
+        json.dump(produtos, arquivo, indent=4, ensure_ascii=False)
+    print("Arquivo produtos.json criado.")
+
+
+def ex06():
+    ex05()
+    with open("produtos.json", "r", encoding="utf-8") as arquivo:
+        produtos = json.load(arquivo)
+    total = sum(p["preco"] * p["estoque"] for p in produtos)
+    print("Valor total do estoque: R$", total)
+
+
+# 7 a 15
+def ex07():
+    email = input("Digite um e-mail: ")
+    padrao = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+    print("E-mail válido" if re.match(padrao, email) else "E-mail inválido")
+
+
+def ex08():
+    texto = "(21) 99999-1234 (11) 98888-7777 (31) 97777-6666"
+    telefones = re.findall(r"\(\d{2}\)\s\d{5}-\d{4}", texto)
+    print(telefones)
+
+
+def ex09():
+    texto = "João: 123.456.789-00\nMaria: 987.654.321-99"
+    print(re.sub(r"\d{3}\.\d{3}\.\d{3}-\d{2}", "***.***.***-**", texto))
+
+
+def ex10():
+    senha = input("Digite uma senha: ")
+    padrao = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$"
+    print("Senha forte" if re.match(padrao, senha) else "Senha fraca")
+
+
+def ex11():
+    texto = "Sites: https://google.com http://github.com https://youtube.com"
+    urls = re.findall(r"https?://[^\s]+", texto)
+    print(urls)
+
+
+def ex12():
+    frase = input("Digite uma frase: ").lower()
+    limpa = re.sub(r"[^a-z0-9]", "", frase)
+    print("É palíndromo" if limpa == limpa[::-1] else "Não é palíndromo")
+
+
+def ex13():
+    texto = input("Digite um texto: ").lower()
+    vogais = 0
+    consoantes = 0
+    for letra in texto:
+        if letra.isalpha():
+            if letra in "aeiou":
+                vogais += 1
+            else:
+                consoantes += 1
+    print("Vogais:", vogais)
+    print("Consoantes:", consoantes)
+
+
+def ex14():
+    texto = input("Digite um texto: ")
+    resultado = ""
+    for letra in texto:
+        if letra.isupper():
+            resultado += letra.lower()
+        elif letra.islower():
+            resultado += letra.upper()
+        else:
+            resultado += letra
+    print(resultado)
+
+
+def ex15():
+    nome = input("Digite o nome completo: ")
+    ignorar = ["da", "de", "do", "dos", "das"]
+    iniciais = ""
+    for palavra in nome.split():
+        if palavra.lower() not in ignorar:
+            iniciais += palavra[0].upper() + "."
+    print(iniciais)
+
+
+# 16 a 20
+class ConnectionTimeoutError(Exception):
+    pass
+
+
+def ex16():
+    try:
+        a = float(input("Primeiro número: "))
+        b = float(input("Segundo número: "))
+        print("Resultado:", a / b)
+    except ZeroDivisionError:
+        print("Erro: divisão por zero.")
+    except ValueError:
+        print("Erro: valor inválido.")
+
+
+def ex17():
+    lista = ["10", "5.5", "texto", [1, 2], "20"]
+    for item in lista:
+        try:
+            print(item, "->", float(item))
+        except (ValueError, TypeError):
+            print(item, "não pode ser convertido.")
+
+
+def ex18():
+    nome = input("Nome do arquivo: ")
+    try:
+        with open(nome, "r", encoding="utf-8") as arquivo:
+            print(arquivo.read())
+    except FileNotFoundError:
+        print("Arquivo não encontrado.")
+    except PermissionError:
+        print("Sem permissão.")
+
+
+def ex19():
+    lista = ["Python", "Java", "C++", "PHP", "JavaScript"]
+    try:
+        indice = int(input("Índice de 0 a 4: "))
+        print(lista[indice])
+    except IndexError:
+        print("Índice inválido.")
+    except ValueError:
+        print("Digite apenas números.")
+
+
+def ex20():
+    try:
+        numero = random.randint(1, 10)
+        if numero % 2 == 0:
+            raise ConnectionTimeoutError("Tempo de conexão esgotado.")
+        print("Conexão realizada com sucesso.")
+    except ConnectionTimeoutError as erro:
+        print("Erro:", erro)
+
+
+# 21 a 26
+def ex21():
+    con = sqlite3.connect("escola.db")
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS alunos (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, nota REAL)")
+    cur.executemany("INSERT INTO alunos (nome, nota) VALUES (?, ?)", [("João", 8.5), ("Maria", 9.0), ("Carlos", 7.5)])
+    con.commit()
+    con.close()
+    print("Banco escola.db criado com 3 alunos.")
+
+
+def ex22():
+    con = sqlite3.connect("escola.db")
+    cur = con.cursor()
+    cur.execute("SELECT * FROM alunos")
+    for aluno in cur.fetchall():
+        print(aluno)
+    con.close()
+
+
+def ex23():
+    try:
+        import mysql.connector
+        con = mysql.connector.connect(host="localhost", user="root", password="1234")
+        cur = con.cursor()
+        cur.execute("SELECT VERSION()")
+        print("Versão MySQL:", cur.fetchone())
+        con.close()
+    except Exception as erro:
+        print("Erro ao conectar no MySQL:", erro)
+
+
+def ex24():
+    try:
+        import mysql.connector
+        con = mysql.connector.connect(host="localhost", user="root", password="1234", database="teste")
+        cur = con.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS clientes (id INT AUTO_INCREMENT PRIMARY KEY, nome VARCHAR(100), email VARCHAR(100))")
+        cur.execute("INSERT INTO clientes (nome, email) VALUES ('Rodrigo', 'rodrigo@gmail.com')")
+        cur.execute("UPDATE clientes SET email='novoemail@gmail.com' WHERE id=1")
+        con.commit()
+        con.close()
+        print("CRUD MySQL executado.")
+    except Exception as erro:
+        print("Erro MySQL:", erro)
+
+
+def ex25():
+    print("Exercício PostgreSQL: precisa instalar psycopg2 e ter PostgreSQL ligado.")
+    print("Código original usava psycopg2 para criar tabela produtos.")
+
+
+def ex26():
+    print("Exercício PostgreSQL: exemplo de transação com commit e rollback.")
+
+
+# 27 a 30 Tkinter
+def ex27():
+    janela = Tk()
+    janela.title("Boas-Vindas")
+    janela.geometry("300x200")
+    entrada = Entry(janela)
+    entrada.pack(pady=10)
+    texto = Label(janela, text="")
+    texto.pack(pady=10)
+
+    def mostrar():
+        texto["text"] = "Olá, " + entrada.get() + "!"
+
+    Button(janela, text="Enviar", command=mostrar).pack()
+    janela.mainloop()
+
+
+def ex28():
+    janela = Tk()
+    janela.title("Calculadora")
+    janela.geometry("300x250")
+    n1 = Entry(janela)
+    n1.pack()
+    n2 = Entry(janela)
+    n2.pack()
+    resultado = Label(janela, text="Resultado")
+    resultado.pack()
+
+    def calc(op):
+        try:
+            a = float(n1.get())
+            b = float(n2.get())
+            if op == "+": r = a + b
+            elif op == "-": r = a - b
+            elif op == "*": r = a * b
+            else: r = a / b
+            resultado["text"] = r
+        except:
+            resultado["text"] = "Erro"
+
+    for op in ["+", "-", "*", "/"]:
+        Button(janela, text=op, command=lambda x=op: calc(x)).pack()
+    janela.mainloop()
+
+
+def ex29():
+    janela = Tk()
+    janela.title("Contador")
+    janela.geometry("250x200")
+    contador = {"valor": 0}
+    label = Label(janela, text="0", font=("Arial", 20))
+    label.pack(pady=20)
+
+    def clicar():
+        contador["valor"] += 1
+        label["text"] = contador["valor"]
+
+    Button(janela, text="Clique aqui", command=clicar).pack()
+    janela.mainloop()
+
+
+def ex30():
+    janela = Tk()
+    janela.title("Cores")
+    janela.geometry("300x200")
+    cor = StringVar()
+
+    def mudar():
+        janela.config(bg=cor.get())
+
+    Radiobutton(janela, text="Vermelho", value="red", variable=cor, command=mudar).pack()
+    Radiobutton(janela, text="Verde", value="green", variable=cor, command=mudar).pack()
+    Radiobutton(janela, text="Azul", value="blue", variable=cor, command=mudar).pack()
+    janela.mainloop()
+
+
+# 31 a 38
+def ex31():
+    with open("datas.txt", "r", encoding="utf-8") as arquivo:
+        texto = arquivo.read()
+    texto = re.sub(r"(\d{2})/(\d{2})/(\d{4})", r"\1-\2-\3", texto)
+    texto = re.sub(r"(\d{4})-(\d{2})-(\d{2})", r"\3-\2-\1", texto)
+    with open("datas_formatadas.txt", "w", encoding="utf-8") as novo:
+        novo.write(texto)
+    print("Arquivo datas_formatadas.txt criado.")
+
+
+def ex32():
+    with open("erros.log", "w", encoding="utf-8") as log:
+        with open("vendas.csv", "r", encoding="utf-8") as arquivo:
+            leitor = csv.reader(arquivo)
+            for linha in leitor:
+                try:
+                    produto = linha[0]
+                    valor = float(linha[1])
+                    print(produto, valor)
+                except:
+                    log.write(f"Erro na linha: {linha}\n")
+    print("Processo finalizado. Veja erros.log.")
+
+
+def ex33():
+    while True:
+        ip = input("Digite um IPv4: ")
+        try:
+            if not re.match(r"^\d{1,3}(\.\d{1,3}){3}$", ip):
+                raise ValueError
+            partes = ip.split(".")
+            if any(int(p) > 255 for p in partes):
+                raise ValueError
+            print("IP válido.")
+            break
+        except ValueError:
+            print("IP inválido.")
+
+
+def ex34():
+    con = sqlite3.connect("usuarios.db")
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS usuarios_email (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE)")
+    email = input("Digite um e-mail: ")
+    try:
+        cur.execute("INSERT INTO usuarios_email (email) VALUES (?)", (email,))
+        con.commit()
+        print("Usuário cadastrado.")
+    except sqlite3.IntegrityError:
+        print("Esse e-mail já existe.")
+    con.close()
+
+
+def ex35():
+    config = {"host": "localhost", "user": "root", "password": "1234", "database": "teste"}
+    with open("config.json", "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=4)
+    print("config.json criado. A conexão real depende do MySQL ligado.")
+
+
+def ex36():
+    janela = Tk()
+    janela.geometry("300x200")
+    Label(janela, text="Usuário").pack()
+    usuario = Entry(janela)
+    usuario.pack()
+    Label(janela, text="Senha").pack()
+    senha = Entry(janela, show="*")
+    senha.pack()
+
+    def entrar():
+        if usuario.get() == "" or senha.get() == "":
+            messagebox.showerror("Erro", "Preencha todos os campos.")
+        else:
+            messagebox.showinfo("Sucesso", "Login realizado.")
+
+    Button(janela, text="Entrar", command=entrar).pack(pady=10)
+    janela.mainloop()
+
+
+def ex37():
+    janela = Tk()
+    janela.title("Busca de Produtos")
+    janela.geometry("400x300")
+    con = sqlite3.connect("produtos.db")
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS produtos (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT)")
+    cur.executemany("INSERT INTO produtos (nome) VALUES (?)", [("Mouse",), ("Teclado",), ("Monitor",)])
+    con.commit()
+
+    entrada = Entry(janela)
+    entrada.pack(pady=5)
+    lista = Listbox(janela, width=30)
+    lista.pack(pady=10)
+
+    def pesquisar():
+        lista.delete(0, END)
+        cur.execute("SELECT nome FROM produtos WHERE nome LIKE ?", ("%" + entrada.get() + "%",))
+        for item in cur.fetchall():
+            lista.insert(END, item[0])
+
+    Button(janela, text="Pesquisar", command=pesquisar).pack()
+    janela.mainloop()
+    con.close()
+
+
+def ex38():
+    janela = Tk()
+    janela.geometry("400x300")
+    caixa = Text(janela, width=40, height=10)
+    caixa.pack()
+    l1 = Label(janela, text="Caracteres: 0")
+    l1.pack()
+    l2 = Label(janela, text="Palavras: 0")
+    l2.pack()
+    l3 = Label(janela, text="Linhas: 0")
+    l3.pack()
+
+    def atualizar(event=None):
+        texto = caixa.get("1.0", END)
+        l1["text"] = "Caracteres: " + str(len(texto) - 1)
+        l2["text"] = "Palavras: " + str(len(texto.split()))
+        l3["text"] = "Linhas: " + str(texto.count("\n"))
+
+    caixa.bind("<KeyRelease>", atualizar)
+    janela.mainloop()
+
+
+# 39 a 50
+def ex39():
+    with open("cadastros_sujos.txt", "r", encoding="utf-8") as arquivo:
+        linhas = arquivo.readlines()
+    with open("clientes_limpos.csv", "w", newline="", encoding="utf-8") as csvfile:
+        escritor = csv.writer(csvfile)
+        escritor.writerow(["Nome", "Email", "Telefone"])
+        for linha in linhas:
+            try:
+                email = re.search(r"[\w\.-]+@[\w\.-]+\.\w+", linha)
+                telefone = re.search(r"\(\d{2}\)\s\d{5}-\d{4}", linha)
+                if not email or not telefone:
+                    raise ValueError
+                nome = linha.replace(email.group(), "").replace(telefone.group(), "")
+                nome = " ".join(nome.split())
+                escritor.writerow([nome, email.group(), telefone.group()])
+            except:
+                print("Linha inválida:", linha.strip())
+    print("clientes_limpos.csv criado.")
+
+
+def ex40():
+    janela = Tk()
+    janela.title("Cadastro")
+    janela.geometry("350x300")
+    con = sqlite3.connect("usuarios_cadastro.db")
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS usuarios (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, email TEXT, cpf TEXT UNIQUE)")
+    Label(janela, text="Nome").pack()
+    nome = Entry(janela)
+    nome.pack()
+    Label(janela, text="E-mail").pack()
+    email = Entry(janela)
+    email.pack()
+    Label(janela, text="CPF").pack()
+    cpf = Entry(janela)
+    cpf.pack()
+
+    def salvar():
+        if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", email.get()):
+            messagebox.showerror("Erro", "E-mail inválido.")
+            return
+        if not re.match(r"^\d{3}\.\d{3}\.\d{3}-\d{2}$", cpf.get()):
+            messagebox.showerror("Erro", "CPF inválido.")
+            return
+        try:
+            cur.execute("INSERT INTO usuarios (nome, email, cpf) VALUES (?, ?, ?)", (nome.get(), email.get(), cpf.get()))
+            con.commit()
+            messagebox.showinfo("Sucesso", "Cadastro realizado.")
+        except sqlite3.IntegrityError:
+            messagebox.showerror("Erro", "CPF já cadastrado.")
+
+    Button(janela, text="Salvar", command=salvar).pack(pady=10)
+    janela.mainloop()
+    con.close()
+
+
+def ex41():
+    janela = Tk()
+    janela.title("Visualizador de Logs")
+    janela.geometry("600x400")
+    filtrados = []
+    lista = Listbox(janela, width=80, height=15)
+    lista.pack(pady=10)
+
+    def carregar():
+        arquivo = filedialog.askopenfilename(filetypes=[("Arquivos de Log", "*.log")])
+        if not arquivo:
+            return
+        lista.delete(0, END)
+        filtrados.clear()
+        with open(arquivo, "r", encoding="utf-8") as f:
+            for linha in f:
+                if re.search(r"CRITICAL|ERROR", linha):
+                    filtrados.append(linha.strip())
+                    lista.insert(END, linha.strip())
+
+    def exportar():
+        with open("logs_filtrados.json", "w", encoding="utf-8") as f:
+            json.dump(filtrados, f, indent=4, ensure_ascii=False)
+        messagebox.showinfo("Sucesso", "logs_filtrados.json criado.")
+
+    Button(janela, text="Carregar Log", command=carregar).pack(pady=5)
+    Button(janela, text="Exportar JSON", command=exportar).pack(pady=5)
+    janela.mainloop()
+
+
+def ex42():
+    con = sqlite3.connect("vendas_backup.db")
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS vendas (id INTEGER PRIMARY KEY AUTOINCREMENT, produto TEXT, valor REAL)")
+    for arquivo in os.listdir("backups"):
+        if arquivo.endswith(".json"):
+            try:
+                with open(os.path.join("backups", arquivo), "r", encoding="utf-8") as f:
+                    dados = json.load(f)
+                cur.execute("INSERT INTO vendas (produto, valor) VALUES (?, ?)", (dados["produto"], dados["valor"]))
+                con.commit()
+                print("Importado:", arquivo)
+            except Exception as erro:
+                print("Erro no arquivo", arquivo, erro)
+    con.close()
+
+
+def ex43():
+    janela = Tk()
+    janela.title("Mini ERP")
+    janela.geometry("500x400")
+    con = sqlite3.connect("estoque.db")
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS produtos (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, preco REAL)")
+    Label(janela, text="Nome").pack()
+    nome = Entry(janela)
+    nome.pack()
+    Label(janela, text="Preço").pack()
+    preco = Entry(janela)
+    preco.pack()
+    lista = Listbox(janela, width=50)
+    lista.pack(pady=10)
+
+    def listar():
+        lista.delete(0, END)
+        cur.execute("SELECT * FROM produtos")
+        for p in cur.fetchall():
+            lista.insert(END, f"{p[0]} - {p[1]} - R$ {p[2]:.2f}")
+
+    def cadastrar():
+        try:
+            cur.execute("INSERT INTO produtos (nome, preco) VALUES (?, ?)", (nome.get(), float(preco.get())))
+            con.commit()
+            listar()
+        except:
+            messagebox.showerror("Erro", "Dados inválidos.")
+
+    def deletar():
+        try:
+            selecionado = lista.get(lista.curselection())
+            id_prod = selecionado.split(" - ")[0]
+            cur.execute("DELETE FROM produtos WHERE id=?", (id_prod,))
+            con.commit()
+            listar()
+        except:
+            messagebox.showerror("Erro", "Selecione um produto.")
+
+    Button(janela, text="Cadastrar", command=cadastrar).pack()
+    Button(janela, text="Listar", command=listar).pack()
+    Button(janela, text="Deletar", command=deletar).pack()
+    listar()
+    janela.mainloop()
+    con.close()
+
+
+def ex44():
+    con = sqlite3.connect("arquivos.db")
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS arquivos (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, data TEXT)")
+    os.makedirs("entrada", exist_ok=True)
+    os.makedirs("processados", exist_ok=True)
+    for arquivo in os.listdir("entrada"):
+        if arquivo.endswith(".txt"):
+            caminho = os.path.join("entrada", arquivo)
+            try:
+                with open(caminho, "r", encoding="utf-8") as f:
+                    primeira = f.readline().strip()
+                cur.execute("INSERT INTO arquivos (nome, data) VALUES (?, ?)", (primeira, datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+                con.commit()
+                shutil.move(caminho, os.path.join("processados", arquivo))
+                print("Arquivo processado:", arquivo)
+            except Exception as erro:
+                print("Erro:", erro)
+    con.close()
+
+
+def ex45():
+    janela = Tk()
+    janela.title("Consulta de Produtos")
+    janela.geometry("600x400")
+    con = sqlite3.connect("consulta.db")
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS produtos (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, preco REAL)")
+    cur.executemany("INSERT INTO produtos (nome, preco) VALUES (?, ?)", [("Mouse", 50), ("Teclado", 120), ("Monitor", 900)])
+    con.commit()
+    Label(janela, text="Digite o nome do produto").pack(pady=10)
+    entrada = Entry(janela, width=40)
+    entrada.pack()
+    lista = Listbox(janela, width=70)
+    lista.pack(pady=10)
+
+    def pesquisar():
+        lista.delete(0, END)
+        cur.execute("SELECT * FROM produtos WHERE nome LIKE ?", ("%" + entrada.get() + "%",))
+        resultados = cur.fetchall()
+        with open("resultado_query.csv", "w", newline="", encoding="utf-8") as f:
+            csv.writer(f).writerows(resultados)
+        for linha in resultados:
+            lista.insert(END, f"{linha[0]} - {linha[1]} - R$ {linha[2]:.2f}")
+        messagebox.showinfo("Sucesso", "Resultado exportado.")
+
+    Button(janela, text="Pesquisar", command=pesquisar).pack(pady=10)
+    janela.mainloop()
+    con.close()
+
+
+def ex46():
+    with open("pagina.html", "r", encoding="utf-8") as arquivo:
+        html = arquivo.read()
+    imagens = re.findall(r'<img.*?src="(.*?)"', html)
+    links = re.findall(r'<a.*?href="(.*?)"', html)
+    con = sqlite3.connect("web.db")
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS imagens (id INTEGER PRIMARY KEY AUTOINCREMENT, caminho TEXT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS links (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT)")
+    for i in imagens:
+        cur.execute("INSERT INTO imagens (caminho) VALUES (?)", (i,))
+    for l in links:
+        cur.execute("INSERT INTO links (url) VALUES (?)", (l,))
+    con.commit()
+    con.close()
+    print("Dados extraídos para web.db.")
+
+
+def ex47():
+    janela = Tk()
+    janela.title("Criptografador")
+    janela.geometry("400x250")
+    arquivo_sel = {"valor": ""}
+    label = Label(janela, text="")
+    label.pack()
+
+    def selecionar():
+        arquivo_sel["valor"] = filedialog.askopenfilename(filetypes=[("Texto", "*.txt")])
+        label["text"] = arquivo_sel["valor"]
+
+    def criptografar():
+        try:
+            chave = int(chave_entry.get())
+            if arquivo_sel["valor"] == "":
+                raise ValueError
+            with open(arquivo_sel["valor"], "r", encoding="utf-8") as f:
+                texto = f.read()
+            resultado = "".join(chr(ord(letra) + chave) for letra in texto)
+            with open("arquivo_criptografado.enc", "w", encoding="utf-8") as f:
+                f.write(resultado)
+            messagebox.showinfo("Sucesso", "Arquivo criptografado.")
+        except:
+            messagebox.showerror("Erro", "Chave ou arquivo inválido.")
+
+    Button(janela, text="Selecionar Arquivo", command=selecionar).pack(pady=10)
+    Label(janela, text="Digite a chave numérica").pack()
+    chave_entry = Entry(janela)
+    chave_entry.pack()
+    Button(janela, text="Criptografar", command=criptografar).pack(pady=10)
+    janela.mainloop()
+
+
+def ex48():
+    janela = Tk()
+    janela.title("Login")
+    janela.geometry("350x250")
+    con = sqlite3.connect("login.db")
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS usuarios (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, senha TEXT)")
+    senha_padrao = hashlib.sha256("1234".encode()).hexdigest()
+    try:
+        cur.execute("INSERT INTO usuarios (email, senha) VALUES (?, ?)", ("admin@gmail.com", senha_padrao))
+        con.commit()
+    except sqlite3.IntegrityError:
+        pass
+
+    def salvar_log(email, resultado):
+        with open("auditoria.log", "a", encoding="utf-8") as f:
+            f.write(f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')} - {email} - {resultado}\n")
+
+    Label(janela, text="E-mail").pack()
+    email = Entry(janela, width=30)
+    email.pack()
+    Label(janela, text="Senha").pack()
+    senha = Entry(janela, show="*", width=30)
+    senha.pack()
+
+    def login():
+        if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", email.get()):
+            salvar_log(email.get(), "EMAIL INVALIDO")
+            messagebox.showerror("Erro", "E-mail inválido.")
+            return
+        senha_hash = hashlib.sha256(senha.get().encode()).hexdigest()
+        cur.execute("SELECT * FROM usuarios WHERE email=? AND senha=?", (email.get(), senha_hash))
+        if cur.fetchone():
+            salvar_log(email.get(), "SUCESSO")
+            messagebox.showinfo("Sucesso", "Login realizado.")
+        else:
+            salvar_log(email.get(), "FALHA")
+            messagebox.showerror("Erro", "E-mail ou senha incorretos.")
+
+    Button(janela, text="Entrar", command=login).pack(pady=15)
+    janela.mainloop()
+    con.close()
+
+
+def ex49():
+    con = sqlite3.connect("vendas.db")
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS vendas (id INTEGER PRIMARY KEY AUTOINCREMENT, produto TEXT, valor REAL, data TEXT)")
+    cur.executemany("INSERT INTO vendas (produto, valor, data) VALUES (?, ?, ?)", [("Mouse", 50, "2026-01-10"), ("Teclado", 120, "2026-01-15"), ("Monitor", 900, "2026-02-20")])
+    con.commit()
+    cur.execute("SELECT substr(data, 1, 7) AS mes, COUNT(*), SUM(valor) FROM vendas GROUP BY mes")
+    relatorio = []
+    for linha in cur.fetchall():
+        relatorio.append({"mes": linha[0], "quantidade_vendas": linha[1], "valor_total": linha[2]})
+    with open("relatorio_ano_2026.json", "w", encoding="utf-8") as f:
+        json.dump(relatorio, f, indent=4, ensure_ascii=False)
+    con.close()
+    print("relatorio_ano_2026.json criado.")
+
+
+def ex50():
+    janela = Tk()
+    janela.title("Dashboard")
+    janela.geometry("800x500")
+    con = sqlite3.connect("dashboard.db")
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS dados (id INTEGER PRIMARY KEY AUTOINCREMENT, texto TEXT)")
+    con.commit()
+    os.makedirs("logs_erro", exist_ok=True)
+
+    def salvar_erro(erro):
+        with open("logs_erro/erros.txt", "a", encoding="utf-8") as f:
+            f.write(str(erro) + "\n")
+
+    lista = Listbox(janela, width=90, height=20)
+    lista.pack(pady=20)
+
+    def listar():
+        lista.delete(0, END)
+        cur.execute("SELECT texto FROM dados")
+        for dado in cur.fetchall():
+            lista.insert(END, dado[0])
+
+    def importar():
+        try:
+            arquivo = filedialog.askopenfilename(filetypes=[("Texto", "*.txt")])
+            if not arquivo:
+                return
+            with open(arquivo, "r", encoding="utf-8") as f:
+                for linha in f:
+                    cur.execute("INSERT INTO dados (texto) VALUES (?)", (linha.strip(),))
+            con.commit()
+            listar()
+        except Exception as erro:
+            salvar_erro(erro)
+            messagebox.showerror("Erro", str(erro))
+
+    frame = Frame(janela)
+    frame.pack(pady=10)
+    Button(frame, text="Importar TXT", command=importar).pack(side=LEFT, padx=10)
+    Button(frame, text="Listar Dados", command=listar).pack(side=LEFT, padx=10)
+    entrada = Entry(frame)
+    entrada.pack(side=LEFT, padx=10)
+
+    def pesquisar():
+        try:
+            lista.delete(0, END)
+            cur.execute("SELECT texto FROM dados")
+            for dado in cur.fetchall():
+                if re.search(entrada.get(), dado[0]):
+                    lista.insert(END, dado[0])
+        except Exception as erro:
+            salvar_erro(erro)
+            messagebox.showerror("Erro", "Pesquisa inválida.")
+
+    Button(frame, text="Buscar", command=pesquisar).pack(side=LEFT)
+    janela.mainloop()
+    con.close()
+
+
+exercicios = {
+    1: ex01, 2: ex02, 3: ex03, 4: ex04, 5: ex05, 6: ex06,
+    7: ex07, 8: ex08, 9: ex09, 10: ex10, 11: ex11,
+    12: ex12, 13: ex13, 14: ex14, 15: ex15,
+    16: ex16, 17: ex17, 18: ex18, 19: ex19, 20: ex20,
+    21: ex21, 22: ex22, 23: ex23, 24: ex24, 25: ex25, 26: ex26,
+    27: ex27, 28: ex28, 29: ex29, 30: ex30,
+    31: ex31, 32: ex32, 33: ex33, 34: ex34, 35: ex35, 36: ex36, 37: ex37, 38: ex38,
+    39: ex39, 40: ex40, 41: ex41, 42: ex42, 43: ex43, 44: ex44, 45: ex45, 46: ex46, 47: ex47, 48: ex48, 49: ex49, 50: ex50
+}
+
+nomes = {
+    1:"Leitura básica", 2:"Escrita reversa", 3:"Filtro CSV", 4:"Analista de logs", 5:"Dump JSON", 6:"Parser JSON",
+    7:"Validador de e-mail", 8:"Extração de telefones", 9:"Mascarar CPF", 10:"Validador de senhas", 11:"Extração de URLs",
+    12:"Palíndromo", 13:"Vogais e consoantes", 14:"Inversor de case", 15:"Gerador de iniciais",
+    16:"Divisão segura", 17:"Conversor de tipos", 18:"Abrir arquivo", 19:"Validador de índice", 20:"Timeout simulado",
+    21:"SQLite inicial", 22:"SQLite consulta", 23:"Conexão MySQL", 24:"CRUD MySQL", 25:"PostgreSQL tabela", 26:"Transação PostgreSQL",
+    27:"Boas-vindas Tkinter", 28:"Calculadora Tkinter", 29:"Contador de cliques", 30:"Seletor de cores",
+    31:"Datas em arquivo", 32:"CSV com try-except", 33:"Validador de IP", 34:"SQLite e e-mail único", 35:"JSON config", 36:"Login Tkinter",
+    37:"Busca SQLite em janela", 38:"Contador avançado de caracteres", 39:"Sanitizador de cadastro", 40:"Cadastro validado em banco",
+    41:"Visualizador de logs", 42:"Backup JSON para banco", 43:"Mini ERP", 44:"Monitor de pasta", 45:"Consulta gráfica", 46:"Extrator HTML",
+    47:"Criptografador", 48:"Login com auditoria", 49:"Relatório JSON", 50:"Dashboard final"
+}
+
+
+def menu_principal():
+    criar_arquivos_exemplo()
+
+    while True:
+        print("\n" + "=" * 50)
+        print("TRABALHO PYTHON - MENU PRINCIPAL")
+        print("=" * 50)
+        print("1  - Exercícios 1 a 6   Arquivos")
+        print("2  - Exercícios 7 a 11  Regex")
+        print("3  - Exercícios 12 a 15 Strings")
+        print("4  - Exercícios 16 a 20 Try-Except")
+        print("5  - Exercícios 21 a 26 Banco de Dados")
+        print("6  - Exercícios 27 a 30 Tkinter")
+        print("7  - Exercícios 31 a 38 Integração")
+        print("8  - Exercícios 39 a 50 Avançados")
+        print("9  - Escolher exercício pelo número")
+        print("0  - Sair")
+
+        opcao = input("Escolha: ")
+
+        if opcao == "0":
+            break
+
+        grupos = {
+            "1": range(1, 7),
+            "2": range(7, 12),
+            "3": range(12, 16),
+            "4": range(16, 21),
+            "5": range(21, 27),
+            "6": range(27, 31),
+            "7": range(31, 39),
+            "8": range(39, 51)
+        }
+
+        if opcao in grupos:
+            submenu(list(grupos[opcao]))
+        elif opcao == "9":
+            try:
+                n = int(input("Digite o número do exercício: "))
+                executar(n)
+            except:
+                print("Número inválido.")
+        else:
+            print("Opção inválida.")
+
+
+def submenu(lista_exercicios):
+    while True:
+        print("\nEscolha um exercício:")
+        for n in lista_exercicios:
+            print(f"{n} - {nomes[n]}")
+        print("0 - Voltar")
+
+        try:
+            opcao = int(input("Escolha: "))
+        except:
+            print("Opção inválida.")
+            continue
+
+        if opcao == 0:
+            break
+        if opcao in lista_exercicios:
+            executar(opcao)
+        else:
+            print("Opção inválida.")
+
+
+def executar(numero):
+    print("\nExecutando:", numero, "-", nomes.get(numero, ""))
+    try:
+        exercicios[numero]()
+    except Exception as erro:
+        print("Erro ao executar:", erro)
+    pausar()
+
+
+if __name__ == "__main__":
+    menu_principal()
