@@ -1,0 +1,10 @@
+import re
+def verificar_palindromo(frase):
+    frase = frase.lower()
+    frase = re.sub(r'[^a-z0-9]', '', frase)
+    if frase == frase[::-1]:
+        return "É um palíndromo"
+    else:
+        return "Não é um palíndromo"
+texto = input("Digite uma frase: ")
+print(verificar_palindromo(texto))
