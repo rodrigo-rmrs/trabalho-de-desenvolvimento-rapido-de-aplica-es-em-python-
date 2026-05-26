@@ -1,0 +1,13 @@
+import re
+def mascarar_cpf(texto):
+    padrao = r"\d{3}\.\d{3}\.\d{3}-\d{2}"
+    resultado = re.sub(padrao, "***.***.***-**", texto)
+    return resultado
+texto = """
+João: 123.456.789-00
+Maria: 987.654.321-99
+"""
+print("Texto original:")
+print(texto)
+print("\nTexto mascarado:")
+print(mascarar_cpf(texto))
