@@ -1,0 +1,78 @@
+from tkinter import *
+from tkinter import messagebox
+import sqlite3
+import re
+import hashlib
+from datetime import datetime
+
+janela = Tk()
+janela.title("Login")
+janela.geometry("350x250")
+
+conexao = sqlite3.connect("login.db")
+cursor = conexao.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE,
+    senha TEXT
+)
+""")
+
+senha_padrao = hashlib.sha256("1234".encode()).hexdigest()
+
+try:
+    cursor.execute(
+        "INSERT INTO usuarios (email, senha) VALUES (?, ?)",
+        ("admin@gmail.com", senha_padrao)
+    )
+    conexao.commit()
+except sqlite3.IntegrityError:
+    pass
+
+def salvar_log(email, resultado):
+    data = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
+    with open("auditoria.log", "a", encoding="utf-8") as arquivo:
+        arquivo.write(f"{data} - {email} - {resultado}\n")
+
+def fazer_login():
+    email = campo_email.get()
+    senha = campo_senha.get()
+
+    padrao_email = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+
+    if not re.match(padrao_email, email):
+        messagebox.showerror("Erro", "E-mail inválido.")
+        salvar_log(email, "EMAIL INVALIDO")
+        return
+
+    senha_hash = hashlib.sha256(senha.encode()).hexdigest()
+
+    cursor.execute(
+        "SELECT * FROM usuarios WHERE email=? AND senha=?",
+        (email, senha_hash)
+    )
+
+    usuario = cursor.fetchone()
+
+    if usuario:
+        messagebox.showinfo("Sucesso", "Login realizado com sucesso.")
+        salvar_log(email, "SUCESSO")
+    else:
+        messagebox.showerror("Erro", "E-mail ou senha incorretos.")
+        salvar_log(email, "FALHA")
+
+Label(janela, text="E-mail").pack(pady=5)
+campo_email = Entry(janela, width=30)
+campo_email.pack()
+
+Label(janela, text="Senha").pack(pady=5)
+campo_senha = Entry(janela, show="*", width=30)
+campo_senha.pack()
+
+Button(janela, text="Entrar", command=fazer_login).pack(pady=15)
+
+janela.mainloop()
+conexao.close()
