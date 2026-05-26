@@ -1,0 +1,35 @@
+from tkinter import *
+
+janela = Tk()
+
+janela.geometry("400x300")
+
+def atualizar(event):
+
+    texto = caixa.get("1.0", END)
+
+    caracteres = len(texto) - 1
+
+    palavras = len(texto.split())
+
+    linhas = texto.count("\n")
+
+    label1["text"] = f"Caracteres: {caracteres}"
+    label2["text"] = f"Palavras: {palavras}"
+    label3["text"] = f"Linhas: {linhas}"
+
+caixa = Text(janela, width=40, height=10)
+caixa.pack()
+
+caixa.bind("<KeyRelease>", atualizar)
+
+label1 = Label(janela, text="Caracteres: 0")
+label1.pack()
+
+label2 = Label(janela, text="Palavras: 0")
+label2.pack()
+
+label3 = Label(janela, text="Linhas: 0")
+label3.pack()
+
+janela.mainloop()
