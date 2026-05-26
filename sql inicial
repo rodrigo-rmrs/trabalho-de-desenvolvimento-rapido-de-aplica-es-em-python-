@@ -1,0 +1,23 @@
+import sqlite3
+
+conexao = sqlite3.connect("escola.db")
+
+cursor = conexao.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS alunos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT,
+    nota REAL
+)
+""")
+
+cursor.execute("INSERT INTO alunos (nome, nota) VALUES ('João', 8.5)")
+cursor.execute("INSERT INTO alunos (nome, nota) VALUES ('Maria', 9.0)")
+cursor.execute("INSERT INTO alunos (nome, nota) VALUES ('Carlos', 7.5)")
+
+conexao.commit()
+
+print("Tabela criada e dados inseridos.")
+
+conexao.close()
