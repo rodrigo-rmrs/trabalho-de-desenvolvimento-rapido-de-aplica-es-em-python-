@@ -1,0 +1,7 @@
+import json
+with open("produtos.json", "r", encoding="utf-8") as arquivo:
+    produtos = json.load(arquivo)
+valor_total = 0
+for produto in produtos:
+    valor_total += produto["preco"] * produto["estoque"]
+print("Valor total do estoque: R$", valor_total)
