@@ -12,3 +12,6 @@ def contar_letras(texto):
                 consoantes += 1
     print("Vogais:", vogais)
     print("Consoantes:", consoantes)
+frase = input("Digite uma frase: ")
+
+contar_letras(frase)
