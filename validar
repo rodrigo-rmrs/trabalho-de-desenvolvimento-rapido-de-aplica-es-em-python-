@@ -1,0 +1,9 @@
+lista = ["Python", "Java", "C++", "PHP", "JavaScript"]
+
+try:
+    indice = int(input("Digite um índice de 0 a 4: "))
+    print("Valor:", lista[indice])
+except IndexError:
+    print("Índice inválido.")
+except ValueError:
+    print("Digite apenas números.")
