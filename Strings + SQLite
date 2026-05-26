@@ -1,0 +1,54 @@
+from tkinter import *
+import sqlite3
+
+janela = Tk()
+
+janela.title("Busca de Produtos")
+janela.geometry("400x300")
+
+conexao = sqlite3.connect("produtos.db")
+
+cursor = conexao.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS produtos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT
+)
+""")
+
+cursor.execute("INSERT INTO produtos (nome) VALUES ('Mouse')")
+cursor.execute("INSERT INTO produtos (nome) VALUES ('Teclado')")
+cursor.execute("INSERT INTO produtos (nome) VALUES ('Monitor')")
+
+conexao.commit()
+
+def pesquisar():
+
+    lista.delete(0, END)
+
+    pesquisa = entrada.get()
+
+    cursor.execute(
+        "SELECT nome FROM produtos WHERE nome LIKE ?",
+        ('%' + pesquisa + '%',)
+    )
+
+    resultados = cursor.fetchall()
+
+    for item in resultados:
+        lista.insert(END, item[0])
+
+Label(janela, text="Digite o produto").pack(pady=5)
+
+entrada = Entry(janela)
+entrada.pack(pady=5)
+
+Button(janela, text="Pesquisar", command=pesquisar).pack(pady=5)
+
+lista = Listbox(janela, width=30)
+lista.pack(pady=10)
+
+janela.mainloop()
+
+conexao.close()
