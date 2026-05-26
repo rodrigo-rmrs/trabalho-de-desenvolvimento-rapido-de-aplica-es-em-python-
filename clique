@@ -1,0 +1,23 @@
+from tkinter import *
+
+janela = Tk()
+
+janela.title("Contador")
+janela.geometry("250x200")
+
+contador = 0
+
+def clicar():
+    global contador
+
+    contador += 1
+
+    texto["text"] = contador
+
+texto = Label(janela, text="0", font=("Arial", 20))
+texto.pack(pady=20)
+
+botao = Button(janela, text="Clique aqui", command=clicar)
+botao.pack()
+
+janela.mainloop()
