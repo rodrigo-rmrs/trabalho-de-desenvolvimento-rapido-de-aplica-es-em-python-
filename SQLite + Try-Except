@@ -1,0 +1,31 @@
+import sqlite3
+
+conexao = sqlite3.connect("usuarios.db")
+
+cursor = conexao.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE
+)
+""")
+
+email = input("Digite um e-mail: ")
+
+try:
+
+    cursor.execute(
+        "INSERT INTO usuarios (email) VALUES (?)",
+        (email,)
+    )
+
+    conexao.commit()
+
+    print("Usuário cadastrado.")
+
+except sqlite3.IntegrityError:
+
+    print("Esse e-mail já existe.")
+
+conexao.close()
