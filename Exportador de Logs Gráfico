@@ -1,0 +1,51 @@
+from tkinter import *
+from tkinter import filedialog, messagebox
+import re
+import json
+
+janela = Tk()
+janela.title("Visualizador de Logs")
+janela.geometry("600x400")
+
+logs_filtrados = []
+
+def carregar_log():
+    global logs_filtrados
+
+    arquivo = filedialog.askopenfilename(
+        filetypes=[("Arquivos de Log", "*.log")]
+    )
+
+    if arquivo == "":
+        return
+
+    with open(arquivo, "r", encoding="utf-8") as f:
+        linhas = f.readlines()
+
+    logs_filtrados = []
+
+    lista.delete(0, END)
+
+    for linha in linhas:
+        if re.search(r"CRITICAL|ERROR", linha):
+            logs_filtrados.append(linha.strip())
+            lista.insert(END, linha.strip())
+
+def exportar_json():
+    if len(logs_filtrados) == 0:
+        messagebox.showwarning("Aviso", "Nenhum log para exportar.")
+        return
+
+    with open("logs_filtrados.json", "w", encoding="utf-8") as arquivo:
+        json.dump(logs_filtrados, arquivo, indent=4, ensure_ascii=False)
+
+    messagebox.showinfo("Sucesso", "Arquivo logs_filtrados.json criado.")
+
+Button(janela, text="Carregar Arquivo de Log", command=carregar_log).pack(pady=10)
+
+lista = Listbox(janela, width=80, height=15)
+lista.pack(pady=10)
+
+Button(janela, text="Exportar para JSON", command=exportar_json).pack(pady=10)
+
+janela.mainloop()
