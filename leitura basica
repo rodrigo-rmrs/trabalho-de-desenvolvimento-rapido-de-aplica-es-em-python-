@@ -1,0 +1,8 @@
+with open("poema.txt", "r", encoding="utf-8") as arquivo:
+    conteudo = arquivo.readlines()
+numero_linhas = len(conteudo)
+numero_palavras = 0
+for linha in conteudo:
+    numero_palavras += len(linha.split())
+print("Número de linhas:", numero_linhas)
+print("Número de palavras:", numero_palavras)
