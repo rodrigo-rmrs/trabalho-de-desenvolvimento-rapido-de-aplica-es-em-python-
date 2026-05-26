@@ -1,0 +1,15 @@
+import re
+
+def inverter_case(texto):
+
+    resultado = ""
+    for letra in texto:
+        if letra.isupper():
+            resultado += letra.lower()
+        elif letra.islower():
+            resultado += letra.upper()
+        else:
+            resultado += letra
+    return resultado
+texto = input("Digite um texto: ")
+print(inverter_case(texto))
