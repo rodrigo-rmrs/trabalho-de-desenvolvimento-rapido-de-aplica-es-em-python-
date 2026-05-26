@@ -1,0 +1,85 @@
+from tkinter import *
+from tkinter import messagebox
+import sqlite3
+import csv
+
+janela = Tk()
+
+janela.title("Consulta de Produtos")
+janela.geometry("600x400")
+
+conexao = sqlite3.connect("banco.db")
+
+cursor = conexao.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS produtos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT,
+    preco REAL
+)
+""")
+
+cursor.execute("INSERT INTO produtos (nome, preco) VALUES ('Mouse', 50)")
+cursor.execute("INSERT INTO produtos (nome, preco) VALUES ('Teclado', 120)")
+cursor.execute("INSERT INTO produtos (nome, preco) VALUES ('Monitor', 900)")
+
+conexao.commit()
+
+def pesquisar():
+
+    lista.delete(0, END)
+
+    nome = entrada.get()
+
+    cursor.execute(
+        "SELECT * FROM produtos WHERE nome LIKE ?",
+        ('%' + nome + '%',)
+    )
+
+    resultados = cursor.fetchall()
+
+    with open(
+        "resultado_query.csv",
+        "w",
+        newline="",
+        encoding="utf-8"
+    ) as arquivo:
+
+        escritor = csv.writer(arquivo)
+
+        for linha in resultados:
+
+            escritor.writerow(linha)
+
+    for linha in resultados:
+
+        texto = f"{linha[0]} - {linha[1]} - R$ {linha[2]:.2f}"
+
+        lista.insert(END, texto)
+
+    messagebox.showinfo(
+        "Sucesso",
+        "Resultado exportado."
+    )
+
+Label(
+    janela,
+    text="Digite o nome do produto"
+).pack(pady=10)
+
+entrada = Entry(janela, width=40)
+entrada.pack()
+
+Button(
+    janela,
+    text="Pesquisar",
+    command=pesquisar
+).pack(pady=10)
+
+lista = Listbox(janela, width=70)
+lista.pack(pady=10)
+
+janela.mainloop()
+
+conexao.close()
