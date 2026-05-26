@@ -1,0 +1,12 @@
+import re
+texto = """
+Contatos:
+(21) 99999-1234
+(11) 98888-7777
+(31) 97777-6666
+"""
+padrao_telefone = r"\(\d{2}\)\s\d{5}-\d{4}"
+telefones = re.findall(padrao_telefone, texto)
+print("Telefones encontrados:")
+for telefone in telefones:
+    print(telefone)
