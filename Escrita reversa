@@ -1,0 +1,7 @@
+with open("dados.txt", "r", encoding="utf-8") as arquivo:
+    linhas = arquivo.readlines()
+linhas.reverse()
+with open("dados_reverso.txt", "w", encoding="utf-8") as novo_arquivo:
+    novo_arquivo.writelines(linhas)
+
+print("Arquivo invertido criado com sucesso!")
